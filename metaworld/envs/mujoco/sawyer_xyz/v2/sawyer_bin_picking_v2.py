@@ -140,7 +140,7 @@ class SawyerBinPickingEnvV2(SawyerXYZEnv):
             sigmoid='long_tail',
         )
 
-        threshold = 0.1
+        threshold = 0.05
         radii = [
             np.linalg.norm(hand[:2] - self.obj_init_pos[:2]),
             np.linalg.norm(hand[:2] - self._target_pos[:2])
@@ -164,20 +164,20 @@ class SawyerBinPickingEnvV2(SawyerXYZEnv):
         object_grasped = self._gripper_caging_reward(
             action,
             obj,
-            obj_radius=0.02,
-            pad_success_thresh=0.05,
+            obj_radius=0.015,
+            pad_success_thresh=0.03,
             object_reach_radius=0.01,
-            xz_thresh=0.005,
+            xz_thresh=0.02,
             desired_gripper_effort=0.6,
             high_density=True,
         )
         reward = reward_utils.hamacher_product(object_grasped, in_place)
 
         tcp_opened = obs[3]
-        tcp_to_obj = np.linalg.norm(obj - self.tcp_center)
+        tcp_to_obj = np.linalg.norm(obj - hand)
 
-        if tcp_to_obj < 0.02 and tcp_opened > 0:
-            reward += 1. + 5. * reward_utils.hamacher_product(
+        if tcp_to_obj < 0.04 and tcp_opened > 0:
+            reward += 5. * reward_utils.hamacher_product(
                 above_floor, in_place
             )
         if target_to_obj < self.TARGET_RADIUS:
